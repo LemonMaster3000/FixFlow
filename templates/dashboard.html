@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Overview | FixFlow Workspace{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="kicker">YOUR ORGANIZATION AT A GLANCE</div><h1>Welcome back, {{ current_user.name.split()[0] }} <span class="spark">✦</span></h1><p>Here’s what’s happening across {{ current_user.organization.name }}.</p></div><a class="button primary" href="{{ url_for('finance') }}">＋ Add transaction</a></div>
+<div class="stat-grid">
+  <article class="stat-card"><div class="stat-top"><span>Institutional balance</span><span class="stat-icon violet">₹</span></div><strong>{{ org_balance|inr }}</strong><small class="positive">Income less expenses</small></article>
+  <article class="stat-card"><div class="stat-top"><span>Institutional income</span><span class="stat-icon green">↗</span></div><strong>{{ org_income|inr }}</strong><small>Recorded income</small></article>
+  <article class="stat-card"><div class="stat-top"><span>My connections</span><span class="stat-icon blue">♧</span></div><strong>{{ connections_count }}</strong><small>People in your contact network</small></article>
+  <article class="stat-card"><div class="stat-top"><span>Upcoming classrooms</span><span class="stat-icon amber">▣</span></div><strong>{{ upcoming_classrooms_count }}</strong><small>Scheduled sessions</small></article>
+</div>
+<div class="grid-two">
+  <section class="panel"><div class="panel-heading"><div><h2>Institutional finances</h2><p>Income and expenses recorded this year</p></div><a class="subtle-link" href="{{ url_for('finance',scope='institutional') }}">View finance ↗</a></div><div class="chart-legend"><span><i class="dot income-dot"></i>Income</span><span><i class="dot expense-dot"></i>Expenses</span></div><div class="chart-area"><canvas id="financeChart"></canvas></div></section>
+  <section class="panel"><div class="panel-heading"><div><h2>Upcoming classroom sessions</h2><p>Next scheduled sessions</p></div><a class="subtle-link" href="{{ url_for('classroom') }}">View all ↗</a></div>
+    {% if classrooms %}<div class="meeting-list">{% for m in classrooms %}<div class="meeting-row"><div class="meeting-date"><b>{{ m.meeting_at.strftime('%d') }}</b><small>{{ m.meeting_at.strftime('%b')|upper }}</small></div><div class="meeting-copy"><b>{{ m.title }}</b><small>{{ m.meeting_at.strftime('%I:%M %p') }} · {{ m.location or 'Location not set' }}</small></div></div>{% endfor %}</div>{% else %}<div class="empty-state compact"><span>▣</span><b>No upcoming classroom sessions</b><small>Schedule your first classroom session.</small><a href="{{ url_for('classroom') }}">Create classroom session</a></div>{% endif %}
+  </section>
+</div>
+<div class="grid-two lower-grid">
+  <section class="panel"><div class="panel-heading"><div><h2>Recent institutional transactions</h2><p>Latest recorded financial activity</p></div><a class="subtle-link" href="{{ url_for('finance',scope='institutional') }}">View all ↗</a></div>
+    {% if transactions %}<div class="table-scroll"><table><thead><tr><th>DESCRIPTION</th><th>DATE</th><th>TYPE</th><th class="right">AMOUNT</th></tr></thead><tbody>{% for t in transactions %}<tr><td><b>{{ t.description }}</b><small>{{ t.category }}</small></td><td>{{ t.transaction_date.strftime('%d %b %Y') }}</td><td><span class="pill {{ t.kind }}">{{ t.kind }}</span></td><td class="right">{{ t.amount|inr }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state compact"><span>₹</span><b>No transactions yet</b><small>Add an institutional transaction to populate this panel.</small></div>{% endif %}
+  </section>
+  <section class="panel"><div class="panel-heading"><div><h2>Recent team activity</h2><p>Latest changes in your workspace</p></div><a class="subtle-link" href="{{ url_for('activity') }}">Activity log ↗</a></div>
+    {% if activity %}<div class="activity-list">{% for a in activity %}<div class="activity-row"><div class="activity-avatar">{{ a.user.name[:1]|upper }}</div><div><b>{{ a.user.name }}</b><p>{{ a.action }}</p><small>{{ a.created_at.strftime('%d %b, %I:%M %p') }}</small></div></div>{% endfor %}</div>{% else %}<div class="empty-state compact"><span>◷</span><b>Nothing here yet</b><small>Workspace actions will appear here.</small></div>{% endif %}
+  </section>
+</div>
+<div class="personal-strip"><div><span class="strip-icon">◎</span><div><b>Your personal finance</b><small>Private to your account. Current recorded balance: {{ personal_balance|inr }}</small></div></div><a href="{{ url_for('finance',scope='personal') }}">Open personal finance ↗</a></div>
+{% endblock %}
+{% block scripts %}<script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script>window.fixflowMonthly={{ monthly|tojson }};</script><script src="{{ url_for('static',filename='js/dashboard.js') }}"></script>{% endblock %}

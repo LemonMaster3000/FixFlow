@@ -1,0 +1,1 @@
+{% extends "base.html" %}{% block title %}{{ code }} | FixFlow{% endblock %}{% block content %}<section class="panel error-panel"><div class="kicker">FIXFLOW WORKSPACE</div><h1>{{ code }}</h1><p>{{ message }}</p><a class="button primary" href="{{ url_for('dashboard') }}">Return to dashboard</a></section>{% endblock %}

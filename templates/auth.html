@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Create account' if mode=='register' else 'Sign in' }} | FixFlow{% endblock %}
+{% block auth_content %}
+<main class="auth-page"><div class="auth-decoration"></div><section class="auth-card">
+<a class="brand auth-brand" href="/"><span class="brand-symbol">F</span><span>fixflow<span class="brand-muted"> workspace</span></span></a>
+<div class="kicker">COLLEGE OPERATIONS, IN ONE PLACE</div>
+<h1>{{ 'Create your FixFlow account' if mode=='register' else 'Welcome back' }}</h1>
+<p class="auth-sub">{{ 'Choose your account type and enter the details needed to find and collaborate with people on FixFlow.' if mode=='register' else 'Sign in to continue to your workspace.' }}</p>
+<form method="post" class="auth-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% if mode=='register' %}
+<div class="account-type-choice"><span class="field-heading">I am registering as</span>
+<label class="type-option"><input type="radio" name="account_type" value="Student" required><span>Student</span></label>
+<label class="type-option"><input type="radio" name="account_type" value="Faculty" required><span>Faculty</span></label>
+<label class="type-option"><input type="radio" name="account_type" value="Other" required><span>Other</span></label></div>
+<label>Full name<input name="name" required maxlength="100" placeholder="Your full name"></label>
+<div id="institution-field" hidden><label>Institution / college name<input id="register-institution" name="organization" maxlength="140" placeholder="e.g. Northfield College"></label></div>
+<div id="enrollment-field" hidden><label>Enrollment number <span class="required-mark">*</span><input id="register-enrollment" name="enrollment_number" maxlength="40" placeholder="Your unique enrollment number"></label></div>
+<label>Gmail / email address<input type="email" name="email" required maxlength="160" placeholder="you@gmail.com"></label>
+<label>Password<input type="password" name="password" required minlength="8" placeholder="At least 8 characters"></label>
+{% else %}
+<label>Email address<input type="email" name="email" required placeholder="you@gmail.com"></label>
+<label>Password<input type="password" name="password" required minlength="8" placeholder="Your password"></label>
+{% endif %}
+<button class="button primary auth-submit">{{ 'Create account' if mode=='register' else 'Sign in' }} <span>→</span></button></form>
+<div class="auth-switch">{% if mode=='register' %}Already have an account? <a href="{{ url_for('login') }}">Sign in</a>{% else %}New to FixFlow? <a href="{{ url_for('register') }}">Create an account</a>{% endif %}</div>
+<div class="auth-foot">Secure workspace access · FixFlow Workspace</div></section></main>
+{% if mode=='register' %}<script>
+(() => {
+ const radios = document.querySelectorAll('input[name="account_type"]');
+ const institutionWrap = document.getElementById('institution-field');
+ const institution = document.getElementById('register-institution');
+ const enrollmentWrap = document.getElementById('enrollment-field');
+ const enrollment = document.getElementById('register-enrollment');
+ function update() {
+   const selected = document.querySelector('input[name="account_type"]:checked')?.value || '';
+   const needsInstitution = selected === 'Student' || selected === 'Faculty';
+   institutionWrap.hidden = !needsInstitution;
+   institution.required = needsInstitution;
+   enrollmentWrap.hidden = selected !== 'Student';
+   enrollment.required = selected === 'Student';
+   enrollment.disabled = selected !== 'Student';
+ }
+ radios.forEach(r => r.addEventListener('change', update)); update();
+})();
+</script>{% endif %}
+{% endblock %}

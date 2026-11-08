@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block title %}Connections | FixFlow{% endblock %}{% block breadcrumb %}Connections{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="kicker">YOUR PEOPLE NETWORK</div><h1>Connections</h1><p>Invite registered FixFlow users. Students at your institution can be found by enrollment number; others by email.</p></div></div>
+<div class="grid-two connections-layout">
+<section class="panel"><div class="panel-heading"><div><h2>Invite a connection</h2><p>They must have a FixFlow account to receive the invitation.</p></div></div>
+<form method="post" class="form-grid compact-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<label>Connection type<select name="connection_type" id="connection-type"><option>Student</option><option>Faculty</option><option>Other</option></select></label>
+<label id="invite-email-field" hidden>Gmail address <span class="required-mark">*</span><input id="invite-email" type="email" name="email" maxlength="160" placeholder="name@gmail.com" disabled></label>
+<label id="invite-enrollment-field">Enrollment number <span class="required-mark">*</span><input id="invite-enrollment" name="enrollment_number" maxlength="40" placeholder="Student's enrollment number"></label>
+<div class="span-two"><button class="button primary">＋ Send invitation</button></div></form>
+<p class="form-note connection-privacy">Student lookup is limited to your institution. Faculty and Other accounts are matched by registered email. An invitation appears in the recipient's FixFlow account.</p></section>
+<section class="panel"><div class="panel-heading"><div><h2>Incoming invitations</h2><p>Accept or reject requests from other users.</p></div><span class="count-chip">{{ incoming|selectattr('status','equalto','pending')|list|length }} pending</span></div>
+{% set pending_incoming = incoming|selectattr('status','equalto','pending')|list %}
+{% if pending_incoming %}<div class="record-list">{% for inv in pending_incoming %}<div class="member-row"><div class="user-avatar">{{ inv.sender.name[:1]|upper }}</div><div class="record-main"><b>{{ inv.sender.name }}</b><small>{{ inv.sender.account_type }} · {{ inv.sender.email }}</small></div><form method="post" action="{{ url_for('respond_invitation', invitation_id=inv.id, decision='accept') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="tiny-button">Accept</button></form><form method="post" action="{{ url_for('respond_invitation', invitation_id=inv.id, decision='reject') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="tiny-button danger-button">Reject</button></form></div>{% endfor %}</div>{% else %}<div class="empty-state compact"><b>No pending invitations</b></div>{% endif %}</section>
+</div>
+<section class="panel"><div class="panel-heading"><div><h2>My connections</h2><p>Accepted connections and sent invitation statuses.</p></div></div>
+{% set accepted_in = incoming|selectattr('status','equalto','accepted')|list %}{% set accepted_out = outgoing|selectattr('status','equalto','accepted')|list %}
+{% if accepted_in or accepted_out %}<div class="record-list">{% for inv in accepted_in %}<div class="member-row"><div class="user-avatar">{{ inv.sender.name[:1]|upper }}</div><div class="record-main"><b>{{ inv.sender.name }}</b><small>{{ inv.sender.account_type }} · {{ inv.sender.email }}</small></div><span class="role-chip">Connected</span></div>{% endfor %}{% for inv in accepted_out %}<div class="member-row"><div class="user-avatar">{{ inv.recipient.name[:1]|upper }}</div><div class="record-main"><b>{{ inv.recipient.name }}</b><small>{{ inv.recipient.account_type }} · {{ inv.recipient.email }}</small></div><span class="role-chip">Connected</span></div>{% endfor %}</div>{% else %}<div class="empty-state compact"><b>No accepted connections yet</b><small>Accepted invitations will appear here.</small></div>{% endif %}
+</section>
+<section class="panel"><div class="panel-heading"><div><h2>Sent invitations</h2><p>Track whether people have accepted or rejected your requests.</p></div></div>
+{% if outgoing %}<div class="record-list">{% for inv in outgoing %}<div class="member-row"><div class="record-main"><b>{{ inv.recipient.name }}</b><small>{{ inv.recipient.email }}</small></div><span class="role-chip">{{ inv.status|capitalize }}</span></div>{% endfor %}</div>{% else %}<div class="empty-state compact"><b>No invitations sent</b></div>{% endif %}
+</section>
+<script>
+(() => { const type=document.getElementById('connection-type'), emailWrap=document.getElementById('invite-email-field'), email=document.getElementById('invite-email'), enrollWrap=document.getElementById('invite-enrollment-field'), enroll=document.getElementById('invite-enrollment'); function sync(){const student=type.value==='Student'; emailWrap.hidden=student; email.required=!student; email.disabled=student; enrollWrap.hidden=!student; enroll.required=student; enroll.disabled=!student;} type.addEventListener('change',sync); sync(); })();
+</script>
+{% endblock %}
