@@ -16,7 +16,7 @@ from sqlalchemy import func, UniqueConstraint
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-app = Flask(__name__)
+app = Flask(__name__, instance_path="/tmp/instance")
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-development-secret")
 database_url = os.environ.get("DATABASE_URL", "sqlite:///fixflow.db")
 if database_url.startswith("postgres://"):
